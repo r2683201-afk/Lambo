@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lamborghini × Tinder | Absolute Velocity</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#050505',
+                        darkCard: '#111111',
+                        neonOrange: '#ff5e3a',
+                        neonYellow: '#ffb300',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Syncopate', 'sans-serif'],
+                        tall: ['Bebas Neue', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom dynamic scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #ff5e3a, #ffb300);
+            border-radius: 10px;
+        }
+
+        /* Noise overlay effect */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            content: "";
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 9999;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none'/%3e%3cfilter id='noise'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noise)'/%3e%3c/svg%3e");
+        }
+
+        /* Glassmorphism utility */
+        .glass-card {
+            background: rgba(18, 18, 18, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .neon-border-orange {
+            box-shadow: 0 0 20px rgba(255, 94, 58, 0.15), inset 0 0 15px rgba(255, 94, 58, 0.05);
+            border: 1px solid rgba(255, 94, 58, 0.4);
+        }
+
+        /* Custom Cursor for premium desktop interaction */
+        #custom-cursor {
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            mix-blend-mode: difference;
+            border-radius: 50%;
+            position: fixed;
+            top: 0; left: 0;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s;
+        }
+
+        .hide-cursor {
+            cursor: none;
+        }
+
+        /* Infinite Marquee */
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            animation: marquee 25s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-darkBg text-white overflow-x-hidden font-sans hide-cursor select-none">
+
+    <div class="noise-overlay"></div>
+    <div id="custom-cursor" class="hidden md:block"></div>
+
+    <div id="preloader" class="fixed inset-0 bg-darkBg z-[999] flex flex-col justify-center items-center">
+        <div class="overflow-hidden mb-4">
+            <h1 class="font-display font-bold text-xl tracking-[0.3em] bg-clip-text text-transparent bg-gradient-to-r from-white via-neutral-400 to-neutral-600 load-text opacity-0 transform translate-y-full">
+                LAMBORGHINI × TINDER
+            </h1>
+        </div>
+        <div class="w-48 h-[1px] bg-neutral-800 relative overflow-hidden">
+            <div id="loader-bar" class="absolute top-0 left-0 h-full w-0 bg-gradient-to-r from-neonOrange to-neonYellow"></div>
+        </div>
+        <span id="load-counter" class="font-tall text-sm tracking-widest mt-2 text-neutral-500">00%</span>
+    </div>
+
+    <header class="fixed top-0 left-0 w-full z-50 px-6 py-4 md:px-12 flex justify-between items-center mix-blend-difference">
+        <a href="#" class="font-display font-bold tracking-[0.2em] text-sm md:text-lg">Lambo<span class="text-neonOrange">×</span>T</a>
+        <nav class="hidden md:flex space-x-8 text-xs font-display tracking-widest uppercase">
+            <a href="#swipe" class="hover:text-neonOrange transition-colors duration-300">Match Experience</a>
+            <a href="#showcase" class="hover:text-neonOrange transition-colors duration-300">Fleet Gallery</a>
+            <a href="#performance" class="hover:text-neonYellow transition-colors duration-300">Telemetry</a>
+        </nav>
+        <a href="#swipe" class="px-4 py-2 border border-white/20 rounded-full text-[10px] font-display tracking-wider uppercase bg-white/5 hover:bg-gradient-to-r hover:from-neonOrange hover:to-neonYellow hover:text-black hover:border-transparent transition-all duration-500">
+            Find Your Match
+        </a>
+    </header>
+
+    <section class="relative h-screen w-full flex flex-col justify-center items-center px-4 overflow-hidden bg-gradient-to-b from-transparent to-darkBg">
+        <div class="absolute inset-0 z-0 flex justify-center items-center opacity-30">
+            <div class="w-[80vw] h-[80vw] md:w-[50vw] md:h-[50vw] rounded-full border border-neonOrange/30 animate-pulse absolute"></div>
+            <div class="w-[60vw] h-[60vw] md:w-[35vw] md:h-[35vw] rounded-full border border-neonYellow/20 absolute"></div>
+        </div>
+
+        <div class="z-10 text-center max-w-5xl px-4 flex flex-col items-center">
+            <h2 class="font-display tracking-[0.4em] text-[10px] md:text-xs text-neonOrange mb-4 uppercase opacity-0 hero-fade">Absolute Synergy</h2>
+            <h1 class="font-display font-bold text-4xl sm:text-6xl md:text-8xl tracking-tighter uppercase leading-none opacity-0 hero-fade mb-6">
+                THE ESSENCE OF <br><span class="bg-clip-text text-transparent bg-gradient-to-r from-neonOrange via-white to-neonYellow">STEALTH ATTRACTION</span>
+            </h1>
+            <p class="max-w-xl text-xs md:text-sm text-neutral-400 font-light tracking-wide leading-relaxed opacity-0 hero-fade mb-8">
+                Where unyielding horsepower collides with high-frequency luxury. Swipe right on raw aerodynamic performance. Your genetic racing double awaits.
+            </p>
+            <div class="opacity-0 hero-fade">
+                <a href="#swipe" class="px-8 py-4 rounded-full font-display text-xs tracking-widest uppercase bg-gradient-to-r from-neonOrange to-neonYellow text-black font-bold shadow-lg shadow-neonOrange/20 hover:scale-105 transition-transform duration-300">
+                    Enter the Garage
+                </a>
+            </div>
+        </div>
+
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-4xl px-4 opacity-0 hero-fade">
+            <div class="glass-card rounded-2xl p-6 flex flex-col md:flex-row justify-around items-center gap-4 neon-border-orange">
+                <div class="text-center md:text-left">
+                    <span class="text-neutral-500 uppercase tracking-widest text-[9px] block">Current Benchmark</span>
+                    <span class="font-tall text-3xl tracking-wide text-white">AVENTADOR SVJ MATTE BLACK</span>
+                </div>
+                <div class="flex gap-8">
+                    <div class="text-center">
+                        <span class="font-tall text-2xl text-neonOrange">6.5L V12</span>
+                        <span class="text-[9px] text-neutral-400 uppercase tracking-widest block">Engine Variant</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="font-tall text-2xl text-neonYellow">350 KM/H</span>
+                        <span class="text-[9px] text-neutral-400 uppercase tracking-widest block">Velocity Envelope</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-6 right-6 z-20 flex items-center space-x-2 text-[10px] tracking-widest uppercase font-display text-neutral-500">
+            <span>Scroll to Match</span>
+            <div class="w-1 h-8 bg-neutral-800 relative rounded-full overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1/2 bg-neonOrange animate-bounce"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="swipe" class="py-24 w-full flex flex-col justify-center items-center px-4 relative overflow-hidden bg-neutral-950">
+        <div class="text-center mb-16 z-10">
+            <span class="font-display text-[10px] tracking-[0.4em] text-neonYellow uppercase">The Dating Interface</span>
+            <h2 class="font-display font-bold text-3xl md:text-5xl uppercase tracking-tight mt-2">SWIPE RIGHT FOR POWER</h2>
+            <p class="text-neutral-500 text-xs mt-3 max-w-md mx-auto">Click and drag cards horizontally to filter and match your performance archetype.</p>
+        </div>
+
+        <div class="relative w-full max-w-[340px] sm:max-w-[380px] h-[520px] z-10 select-none">
+            
+            <div class="swipe-card absolute inset-0 glass-card rounded-3xl overflow-hidden p-6 flex flex-col justify-between transform rotate-[-2deg] transition-transform duration-300 shadow-2xl" data-car="HURACÁN STO">
+                <div class="relative w-full h-2/3 rounded-2xl overflow-hidden bg-neutral-900 flex items-center justify-center border border-white/5">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10"></div>
+                    <div class="absolute text-neutral-800 font-tall text-9xl tracking-tighter select-none">V10</div>
+                    <div class="z-20 text-center p-4">
+                        <span class="text-[10px] tracking-widest text-neonOrange bg-neonOrange/10 px-2 py-1 rounded">RACE INSPIRED</span>
+                    </div>
+                </div>
+                <div class="pt-4 flex-grow flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-end">
+                            <h3 class="font-tall text-3xl tracking-wide">HURACÁN STO, 24</h3>
+                            <span class="text-neonYellow text-xs font-display">640 HP</span>
+                        </div>
+                        <p class="text-[11px] text-neutral-400 mt-2 font-light line-clamp-2">"Pure track layout legalized for open-road courtship. Not into subtle profiles."</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-center text-[10px] tracking-wider uppercase font-tall mt-4">
+                        <div class="bg-white/5 rounded-lg p-2 border border-white/5">0-100: 3.0s</div>
+                        <div class="bg-white/5 rounded-lg p-2 border border-white/5">RWD Setup</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swipe-card absolute inset-0 glass-card rounded-3xl overflow-hidden p-6 flex flex-col justify-between transform rotate-[1deg] transition-transform duration-300 shadow-2xl" data-car="REVUELTO">
+                <div class="relative w-full h-2/3 rounded-2xl overflow-hidden bg-neutral-900 flex items-center justify-center border border-white/5">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10"></div>
+                    <div class="absolute text-neutral-800 font-tall text-9xl tracking-tighter select-none">HYBRID</div>
+                    <div class="z-20 text-center p-4">
+                        <span class="text-[10px] tracking-widest text-neonYellow bg-neonYellow/10 px-2 py-1 rounded">NEW ERA</span>
+                    </div>
+                </div>
+                <div class="pt-4 flex-grow flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-end">
+                            <h3 class="font-tall text-3xl tracking-wide">REVUELTO, 21</h3>
+                            <span class="text-neonOrange text-xs font-display">1015 HP</span>
+                        </div>
+                        <p class="text-[11px] text-neutral-400 mt-2 font-light line-clamp-2">"High-voltage hybrid mechanics seeking seamless connectivity with high-octane souls."</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-center text-[10px] tracking-wider uppercase font-tall mt-4">
+                        <div class="bg-white/5 rounded-lg p-2 border border-white/5">Tri-Motor</div>
+                        <div class="bg-white/5 rounded-lg p-2 border border-white/5">Top Speed: 355+</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="swipe-card absolute inset-0 glass-card rounded-3xl overflow-hidden p-6 flex flex-col justify-between transform rotate-[-1deg] transition-transform duration-300 shadow-2xl touch-none" data-car="AVENTADOR SVJ">
+                <div class="relative w-full h-2/3 rounded-2xl overflow-hidden bg-neutral-900 flex items-center justify-center border border-white/5">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10"></div>
+                    <div class="absolute text-neutral-800 font-tall text-9xl tracking-tighter select-none">V12</div>
+                    <div class="z-20 text-center p-4">
+                        <span class="text-[10px] tracking-widest text-white border border-white/20 bg-black/40 px-2 py-1 rounded">MATCH ARCHETYPE</span>
+                    </div>
+                </div>
+                <div class="pt-4 flex-grow flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-end">
+                            <h3 class="font-tall text-3xl tracking-wide">AVENTADOR SVJ, 25</h3>
+                            <span class="text-neonOrange text-xs font-display">770 HP</span>
+                        </div>
+                        <p class="text-[11px] text-neutral-400 mt-2 font-light line-clamp-2">"Naturally aspirated apex predator looking for a partner capable of lateral high-g load."</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-center text-[10px] tracking-wider uppercase font-tall mt-4">
+                        <div class="bg-white/5 rounded-lg p-2 border border-white/5">Naturally N/A</div>
+                        <div class="bg-white/5 rounded-lg p-2 border border-white/5">ALA Aero 2.0</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="flex space-x-6 mt-12 z-10">
+            <button id="btn-pass" class="w-14 h-14 rounded-full bg-neutral-900 border border-white/10 flex items-center justify-center hover:bg-neutral-800 active:scale-95 transition-all text-neutral-400 hover:text-neonOrange">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+            <button id="btn-match" class="w-14 h-14 rounded-full bg-gradient-to-r from-neonOrange to-neonYellow flex items-center justify-center active:scale-95 transition-all text-black">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
+        </div>
+    </section>
+
+    <section id="showcase" class="w-full bg-darkBg overflow-hidden">
+        <div class="horizontal-scroll-container flex items-center h-screen" style="width: 300vw;">
+            
+            <div class="w-screen h-full flex-shrink-0 flex flex-col justify-center px-6 md:px-24 bg-neutral-950 relative border-r border-white/5">
+                <span class="font-tall text-[12vw] leading-none text-neutral-900 uppercase tracking-tighter absolute right-10 bottom-10 z-0 select-none">CARBON</span>
+                <div class="z-10 max-w-xl">
+                    <span class="text-xs text-neonOrange tracking-[0.3em] font-display uppercase block mb-2">Design Framework 01</span>
+                    <h2 class="font-display font-bold text-3xl md:text-5xl uppercase tracking-tight mb-6">MONOCOQUE DESIGN VARIATION</h2>
+                    <p class="text-neutral-400 text-xs md:text-sm leading-relaxed mb-6">
+                        Every match features built-in active safety engineering. Built raw entirely from lightweight high-rigidity forging components.
+                    </p>
+                    <div class="w-24 h-[1px] bg-gradient-to-r from-neonOrange to-transparent"></div>
+                </div>
+            </div>
+
+            <div class="w-screen h-full flex-shrink-0 flex flex-col justify-center px-6 md:px-24 bg-darkBg relative border-r border-white/5">
+                <span class="font-tall text-[12vw] leading-none text-neutral-900 uppercase tracking-tighter absolute right-10 bottom-10 z-0 select-none">VELOCITY</span>
+                <div class="z-10 max-w-xl">
+                    <span class="text-xs text-neonYellow tracking-[0.3em] font-display uppercase block mb-2">Design Framework 02</span>
+                    <h2 class="font-display font-bold text-3xl md:text-5xl uppercase tracking-tight mb-6">AERODYNAMICS OF ATTRACTION</h2>
+                    <p class="text-neutral-400 text-xs md:text-sm leading-relaxed mb-6">
+                        Optimizing airflow management. Internal computational aerodynamics ensure perfect adhesion to the road when hearts race past high thresholds.
+                    </p>
+                    <div class="w-24 h-[1px] bg-gradient-to-r from-neonYellow to-transparent"></div>
+                </div>
+            </div>
+
+            <div class="w-screen h-full flex-shrink-0 flex flex-col justify-center px-6 md:px-24 bg-neutral-950 relative">
+                <span class="font-tall text-[12vw] leading-none text-neutral-900 uppercase tracking-tighter absolute right-10 bottom-10 z-0 select-none">COCKPIT</span>
+                <div class="z-10 max-w-xl">
+                    <span class="text-xs text-white tracking-[0.3em] font-display uppercase block mb-2">Design Framework 03</span>
+                    <h2 class="font-display font-bold text-3xl md:text-5xl uppercase tracking-tight mb-6">INTELLIGENT UI CONSOLE</h2>
+                    <p class="text-neutral-400 text-xs md:text-sm leading-relaxed mb-6">
+                        A continuous connection stream keeping driver telemetry and geolocation signals synchronized inside a fully real-time responsive ecosystem.
+                    </p>
+                    <div class="w-24 h-[1px] bg-gradient-to-r from-white to-transparent"></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="performance" class="py-32 px-6 md:px-12 w-full bg-darkBg relative overflow-hidden">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
+            <div class="glass-card rounded-3xl p-8 neon-border-orange relative flex flex-col justify-between h-[400px]">
+                <div>
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-[10px] font-display tracking-widest text-neutral-400 uppercase">SYS TELEMETRY // ACTIVE</span>
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
+                    </div>
+                    <div class="relative w-full h-40 flex items-center justify-center">
+                        <svg class="w-64 h-32 transform rotate-180" viewBox="0 0 100 50">
+                            <path d="M 10,50 A 40,40 0 0,1 90,50" fill="none" stroke="#222" stroke-width="4" stroke-linecap="round"/>
+                            <path id="speed-arc" d="M 10,50 A 40,40 0 0,1 90,50" fill="none" stroke="url(#orange-grad)" stroke-width="6" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251"/>
+                            <defs>
+                                <linearGradient id="orange-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#ff5e3a" />
+                                    <stop offset="100%" stop-color="#ffb300" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="absolute bottom-4 text-center">
+                            <span id="speed-val" class="font-tall text-6xl tracking-wide text-white block">0</span>
+                            <span class="text-[9px] text-neutral-500 tracking-widest uppercase">KM/H CLIMBING</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 pt-6 border-t border-white/5 text-center">
+                    <div>
+                        <span class="text-[10px] text-neutral-500 uppercase block tracking-wider">0-100 Speed</span>
+                        <span class="font-tall text-xl text-white">2.8 SEC</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-neutral-500 uppercase block tracking-wider">Aero Profile</span>
+                        <span class="font-tall text-xl text-neonOrange">CBRN</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-neutral-500 uppercase block tracking-wider">Max Torque</span>
+                        <span class="font-tall text-xl text-neonYellow">720 NM</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <span class="font-display text-[10px] tracking-[0.4em] text-neonOrange uppercase block mb-2">Telemetry Performance</span>
+                <h2 class="font-display font-bold text-3xl md:text-5xl uppercase tracking-tight mb-6">MATCH ENGINE DYNAMICS</h2>
+                <p class="text-neutral-400 text-sm leading-relaxed mb-8">
+                    We redefined standard interaction pipelines. This isn't algorithms filtering surface-level profiles; it's a structural analysis matching acceleration profiles, curves, downforce preferences, and split-second reaction times.
+                </p>
+
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between text-xs font-display tracking-wider text-neutral-300 mb-2">
+                            <span>ALGORITHMIC ADHESION</span>
+                            <span>98%</span>
+                        </div>
+                        <div class="w-full h-[2px] bg-neutral-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-neonOrange w-[98%] origin-left" id="bar-1"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-display tracking-wider text-neutral-300 mb-2">
+                            <span>THERMAL ATTRACTION INDEX</span>
+                            <span>85%</span>
+                        </div>
+                        <div class="w-full h-[2px] bg-neutral-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-neonYellow w-[85%] origin-left" id="bar-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="py-20 w-full bg-neutral-950 overflow-hidden border-y border-white/5">
+        <div class="w-full flex overflow-hidden whitespace-nowrap relative">
+            <div class="flex space-x-8 animate-marquee items-center">
+                <div class="inline-block w-80 glass-card rounded-2xl p-6 whitespace-normal">
+                    <p class="text-xs text-neutral-300 font-light">"Matched with a Revuelto profile in Milan. The first date was lap tracking at Monza. Phenomenal acceleration."</p>
+                    <div class="mt-4 flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-neutral-800 border border-neonOrange/40"></div>
+                        <div>
+                            <h4 class="text-xs font-bold font-display uppercase tracking-wider">Marco V.</h4>
+                            <span class="text-[9px] text-neutral-500 uppercase">Verified Driver</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="inline-block w-80 glass-card rounded-2xl p-6 whitespace-normal">
+                    <p class="text-xs text-neutral-300 font-light">"I always wanted true mechanical synergy. Tinder luxury concierge completely unlocked that dimension."</p>
+                    <div class="mt-4 flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-neutral-800 border border-neonYellow/40"></div>
+                        <div>
+                            <h4 class="text-xs font-bold font-display uppercase tracking-wider">Alessia K.</h4>
+                            <span class="text-[9px] text-neutral-500 uppercase">Verified Driver</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="inline-block w-80 glass-card rounded-2xl p-6 whitespace-normal">
+                    <p class="text-xs text-neutral-300 font-light">"Matched with a Revuelto profile in Milan. The first date was lap tracking at Monza. Phenomenal acceleration."</p>
+                    <div class="mt-4 flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-neutral-800 border border-neonOrange/40"></div>
+                        <div>
+                            <h4 class="text-xs font-bold font-display uppercase tracking-wider">Marco V.</h4>
+                            <span class="text-[9px] text-neutral-500 uppercase">Verified Driver</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="inline-block w-80 glass-card rounded-2xl p-6 whitespace-normal">
+                    <p class="text-xs text-neutral-300 font-light">"I always wanted true mechanical synergy. Tinder luxury concierge completely unlocked that dimension."</p>
+                    <div class="mt-4 flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-neutral-800 border border-neonYellow/40"></div>
+                        <div>
+                            <h4 class="text-xs font-bold font-display uppercase tracking-wider">Alessia K.</h4>
+                            <span class="text-[9px] text-neutral-500 uppercase">Verified Driver</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="h-screen w-full relative flex flex-col justify-center items-center px-4 overflow-hidden bg-darkBg">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-neonOrange/5 to-transparent z-0 pointer-events-none"></div>
+        
+        <div class="z-10 text-center max-w-3xl flex flex-col items-center">
+            <h2 class="font-display tracking-[0.5em] text-[10px] md:text-xs text-neonYellow mb-6 uppercase">Exclusive Campaign Phase</h2>
+            <h2 class="font-display font-bold text-4xl sm:text-6xl md:text-7xl uppercase tracking-tighter leading-none mb-8">
+                READY TO ENGAGE <br>LAUNCH CONTROL?
+            </h2>
+            <p class="text-neutral-400 text-xs md:text-sm font-light tracking-wide max-w-lg mb-10 leading-relaxed">
+                Applications are limited. Sign up with your unique passport telemetry profiles to join the high-performance matching track.
+            </p>
+            
+            <form class="w-full max-w-md flex flex-col sm:flex-row gap-3 items-center justify-center" onsubmit="event.preventDefault(); alert('Telemetry Sync Complete.');">
+                <input type="email" placeholder="ENTER SYNC PASS MAIL" required class="w-full px-6 py-4 rounded-full bg-neutral-900 border border-white/10 text-xs font-display tracking-widest text-white placeholder-neutral-600 focus:outline-none focus:border-neonOrange transition-colors">
+                <button type="submit" class="w-full sm:w-auto px-8 py-4 rounded-full font-display text-xs tracking-widest uppercase bg-white text-black font-bold hover:bg-gradient-to-r hover:from-neonOrange hover:to-neonYellow hover:text-black transition-all duration-300 shrink-0">
+                    Request Sync
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="bg-neutral-950 border-t border-white/5 py-12 px-6 md:px-12 text-center md:text-left">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <p class="font-display font-bold tracking-[0.2em] text-sm text-neutral-400">LAMBORGHINI × TINDER</p>
+                <p class="text-[10px] text-neutral-600 mt-2 font-light">© 2026 AUTOMOBILI LAMBORGHINI S.P.A. / TINDER INC. ALL RIGHTS RESERVED.</p>
+            </div>
+            <div class="flex space-x-6 text-[10px] font-display uppercase tracking-widest text-neutral-500">
+                <a href="#" class="hover:text-neonOrange transition-colors">Privacy Strategy</a>
+                <a href="#" class="hover:text-neonYellow transition-colors">Telemetry Legal</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Smooth Lenis Scrolling
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true
+        });
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // Register ScrollTrigger with GSAP
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Custom Cursor Motion
+        const cursor = document.getElementById('custom-cursor');
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, {
+                x: e.clientX,
+                y: e.clientY,
+                duration: 0.1,
+                ease: 'power2.out'
+            });
+        });
+
+        // Hover expand cursor tracking
+        document.querySelectorAll('a, button, input').forEach(elem => {
+            elem.addEventListener('mouseenter', () => cursor.style.transform = 'translate(-50%, -50%) scale(2.5)');
+            elem.addEventListener('mouseleave', () => cursor.style.transform = 'translate(-50%, -50%) scale(1)');
+        });
+
+        // Preloader Sequence
+        window.addEventListener('DOMContentLoaded', () => {
+            let count = 0;
+            const counterElem = document.getElementById('load-counter');
+            const loaderBar = document.getElementById('loader-bar');
+
+            const interval = setInterval(() => {
+                count += Math.floor(Math.random() * 15) + 5;
+                if (count >= 100) {
+                    count = 100;
+                    clearInterval(interval);
+                    
+                    // Exit preloader
+                    gsap.timeline()
+                        .to('#preloader', {
+                            opacity: 0,
+                            duration: 0.8,
+                            ease: 'power3.inOut',
+                            onComplete: () => document.getElementById('preloader').remove()
+                        })
+                        .to('.hero-fade', {
+                            opacity: 1,
+                            y: 0,
+                            stagger: 0.15,
+                            duration: 1,
+                            ease: 'power3.out'
+                        });
+                }
+                counterElem.innerText = `${count.toString().padStart(2, '0')}%`;
+                loaderBar.style.width = `${count}%`;
+            }, 80);
+
+            gsap.to('.load-text', { opacity: 1, y: 0, duration: 0.6, delay: 0.1 });
+        });
+
+        // SECTION 3: Horizontal Gallery Configuration via GSAP ScrollTrigger
+        const horizontalContainer = document.querySelector('.horizontal-scroll-container');
+        gsap.to(horizontalContainer, {
+            x: () => -(horizontalContainer.scrollWidth - window.innerWidth),
+            ease: 'none',
+            scrollTrigger: {
+                trigger: '#showcase',
+                pin: true,
+                scrub: 1,
+                start: 'top top',
+                end: () => `+=${horizontalContainer.scrollWidth - window.innerWidth}`
+            }
+        });
+
+        // SECTION 4: Speedometer / Telemetry Counters
+        gsap.to('#speed-val', {
+            innerText: 350,
+            snap: { innerText: 1 },
+            scrollTrigger: {
+                trigger: '#performance',
+                start: 'top 60%',
+            },
+            duration: 2.5,
+            ease: 'power3.out'
+        });
+
+        gsap.to('#speed-arc', {
+            strokeDashoffset: 0,
+            scrollTrigger: {
+                trigger: '#performance',
+                start: 'top 60%',
+            },
+            duration: 2.5,
+            ease: 'power3.out'
+        });
+
+        // SECTION 2: Swipe Experience Interaction Engine (Vanilla Drag / Pointer Events)
+        const cards = document.querySelectorAll('.swipe-card');
+        let currentCardIndex = cards.length - 1;
+
+        cards.forEach((card) => {
+            let startX = 0;
+            let currentX = 0;
+            let isDragging = false;
+
+            card.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                card.style.transition = 'none';
+            });
+
+            document.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                currentX = e.clientX - startX;
+                let rotate = currentX * 0.05;
+                card.style.transform = `translateX(${currentX}px) rotate(${rotate}deg)`;
+            });
+
+            document.addEventListener('pointerup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                card.style.transition = 'transform 0.5s ease-out';
+
+                if (currentX > 120) {
+                    // Right Swipe (Match)
+                    swipeAway(card, 'right');
+                } else if (currentX < -120) {
+                    // Left Swipe (Pass)
+                    swipeAway(card, 'left');
+                } else {
+                    // Snap back
+                    card.style.transform = 'translateX(0px) rotate(0deg)';
+                }
+            });
+        });
+
+        function swipeAway(card, direction) {
+            let targetX = direction === 'right' ? window.innerWidth : -window.innerWidth;
+            card.style.transform = `translateX(${targetX}px) rotate(${targetX * 0.05}deg)`;
+            setTimeout(() => {
+                card.remove();
+                currentCardIndex--;
+                if (currentCardIndex < 0) {
+                    // Re-instantiate notification or loop
+                    alert('Configuration Queue Synchronized.');
+                }
+            }, 300);
+        }
+
+        // Action button bindings
+        document.getElementById('btn-pass').addEventListener('click', () => {
+            const topCard = document.querySelectorAll('.swipe-card')[document.querySelectorAll('.swipe-card').length - 1];
+            if (topCard) swipeAway(topCard, 'left');
+        });
+
+        document.getElementById('btn-match').addEventListener('click', () => {
+            const topCard = document.querySelectorAll('.swipe-card')[document.querySelectorAll('.swipe-card').length - 1];
+            if (topCard) swipeAway(topCard, 'right');
+        });
+    </script>
+</body>
+</html>
